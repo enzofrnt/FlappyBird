@@ -524,7 +524,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   minTime: 1
-  maxTime: 20
+  maxTime: 10
   pipe: {fileID: 7163238417354025282, guid: df45964bb11b84a07ac2a8e9364e4b84, type: 3}
   height: 1
 --- !u!4 &465137257

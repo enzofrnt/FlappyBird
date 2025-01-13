@@ -1,5 +1,4 @@
 using TMPro;
-using UnityEditor.Tilemaps;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -11,6 +10,8 @@ public class birdScript : MonoBehaviour
     public TextMeshProUGUI inGameScoreText;
     public GameObject gameOverCanvas;
     public Animator birdAnim;
+    public float tiltAngle = 45f; // Angle maximum d'inclinaison
+    public float rotationSpeed = 5f; // Vitesse de rotation de l'oiseau
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -45,7 +46,20 @@ public class birdScript : MonoBehaviour
         // Limiter la position Y de l'oiseau
         Vector3 pos = transform.position;
         pos.y = Mathf.Clamp(pos.y, -4.5f, 4.5f);
-        transform.position = pos; // La position directe peut être mise ici ou laissée dans Update
+        transform.position = pos;
+
+        // Ajuster l'inclinaison en fonction de la vitesse verticale
+        AdjustBirdRotation();
+    }
+
+    private void AdjustBirdRotation()
+    {
+        // Calculer l'angle cible en fonction de la vitesse verticale
+        float targetAngle = Mathf.Lerp(-tiltAngle, tiltAngle, (rb.linearVelocity.y + velocity) / (2 * velocity));
+
+        // Appliquer une rotation en douceur vers l'angle cible
+        Quaternion targetRotation = Quaternion.Euler(0, 0, targetAngle);
+        transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, rotationSpeed * Time.fixedDeltaTime);
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
