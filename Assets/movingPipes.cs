@@ -2,18 +2,16 @@ using UnityEngine;
 
 public class movingPipes : MonoBehaviour
 {
+    public float speed = 2f; // Vitesse initiale des tuyaux
+    public float speedIncrement = 0.1f; // Quantité d'accélération par seconde
 
-    public float speed;
-    
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    // FixedUpdate is called at a fixed interval and is independent of frame rate
+    void FixedUpdate()
     {
-        
-    }
+        // Déplacement physique dans FixedUpdate
+        transform.position += Vector3.left * speed * Time.fixedDeltaTime;
 
-    // Update is called once per frame
-    void Update()
-    {
-        transform.position += Vector3.left * speed * Time.deltaTime;
+        // Augmenter progressivement la vitesse
+        speed += speedIncrement * Time.fixedDeltaTime;
     }
 }

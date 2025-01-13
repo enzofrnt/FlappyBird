@@ -1,30 +1,46 @@
+using System;
 using UnityEngine;
 
 public class spawningPipes : MonoBehaviour
 {
-    public float maxTime = 1;
+    public float minTime = 1f; // Temps minimal entre les spawns
+    public float maxTime = 100000000f; // Temps maximal entre les spawns
     private float timer = 0;
     public GameObject pipe;
     public float height;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    private float nextSpawnTime; // Temps défini pour le prochain spawn
+
+    // Start is called before the first frame update
     void Start()
     {
-        GameObject newPipe = Instantiate(pipe);
-        newPipe.transform.position = transform.position + new Vector3(0, Random.Range(-height, height), 0);
+        SetNextSpawnTime(); // Initialiser le temps du prochain spawn
+        SpawnPipe(); // Créer un premier tuyau
     }
 
-    // Update is called once per frame
-    void Update()
+    // FixedUpdate is called at a fixed interval and is independent of frame rate
+    void FixedUpdate()
     {
-        if (timer > maxTime)
+        if (timer > nextSpawnTime)
         {
-            GameObject newPipe = Instantiate(pipe);
-            newPipe.transform.position = transform.position + new Vector3(0, Random.Range(-height, height), 0);
-            Destroy(newPipe, 15);
+            SpawnPipe(); // Créer un nouveau tuyau
             timer = 0;
+            SetNextSpawnTime(); // Définir le temps pour le prochain spawn
         }
 
-        timer += Time.deltaTime;
+        timer += Time.fixedDeltaTime; // Incrémenter le timer
+    }
+
+    private void SpawnPipe()
+    {
+        GameObject newPipe = Instantiate(pipe);
+        newPipe.transform.position = transform.position + new Vector3(0, UnityEngine.Random.Range(-height, height), 0);
+        Destroy(newPipe, 15); // Détruire le tuyau après 15 secondes
+    }
+
+    private void SetNextSpawnTime()
+    {
+        // Définir aléatoirement le temps pour le prochain spawn entre minTime et maxTime
+        nextSpawnTime = UnityEngine.Random.Range(minTime, maxTime);
     }
 }

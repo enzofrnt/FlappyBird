@@ -523,7 +523,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a7947c81f4c064509a58cc12ef521e1c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxTime: 1
+  minTime: 1
+  maxTime: 20
   pipe: {fileID: 7163238417354025282, guid: df45964bb11b84a07ac2a8e9364e4b84, type: 3}
   height: 1
 --- !u!4 &465137257
@@ -1304,7 +1305,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 58659be9a68cd496e8a27eb578b9b59c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  velocity: 1
+  velocity: 3.5
   inGameScoreText: {fileID: 2000100541}
   gameOverCanvas: {fileID: 159470477}
   birdAnim: {fileID: 1083284465}
