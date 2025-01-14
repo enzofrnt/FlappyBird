@@ -34,18 +34,25 @@ public class birdScript : MonoBehaviour
         bool inputDetected = Input.GetKeyDown(KeyCode.Space) || 
             (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began);
 
-        if (inputDetected && !GameStateManager.Instance.IsGameplayActive)
-        {
-            GameStateManager.Instance.StartGameplay();
-            rb.simulated = true; // Réactive la physique quand le jeu démarre
-            tutorialCanvas.SetActive(false);
-        }
-
         if (inputDetected)
         {
-            birdAnim.Play("birdFlap");
-            audioSource.PlayOneShot(flapSound);
-            audioSource.pitch = Random.Range(0.9f, 1.1f);
+            if (!GameStateManager.Instance.IsGameplayActive)
+            {
+                GameStateManager.Instance.StartGameplay();
+                rb.simulated = true; 
+                tutorialCanvas.SetActive(false);
+
+                // On force directement un flap ici
+                rb.linearVelocity = Vector2.up * velocity; 
+                // Éventuellement jouer l’anim/son ici aussi
+            }
+
+            if (!GameStateManager.Instance.IsGameOver)
+            {
+                birdAnim.Play("birdFlap");
+                audioSource.PlayOneShot(flapSound);
+                audioSource.pitch = Random.Range(0.9f, 1.1f);
+            }
         }
 
         inGameScoreText.text = score.ToString();
@@ -60,6 +67,7 @@ public class birdScript : MonoBehaviour
         if (Input.GetKey(KeyCode.Space) || 
             (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began))
         {
+            Debug.Log("Flap");
             rb.linearVelocity = Vector2.up * velocity; // Gérer la vitesse avec la physique
             isFalling = false; // L'oiseau n'est plus en chute
         }
@@ -97,7 +105,9 @@ public class birdScript : MonoBehaviour
     private void OnCollisionEnter2D(Collision2D collision)
     {
         audioSource.PlayOneShot(hitSound);
-        audioSource.PlayOneShot(gameOverSound);
+        if(GameStateManager.Instance.IsGameplayActive) {
+            audioSource.PlayOneShot(gameOverSound);
+        }
         gameOverCanvas.SetActive(true);
         GameStateManager.Instance.StopGameplay();
     }
