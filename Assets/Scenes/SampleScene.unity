@@ -524,7 +524,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   minTime: 1
-  maxTime: 10
+  maxTime: 5
   pipe: {fileID: 7163238417354025282, guid: df45964bb11b84a07ac2a8e9364e4b84, type: 3}
   height: 1
 --- !u!4 &465137257
@@ -1309,6 +1309,8 @@ MonoBehaviour:
   inGameScoreText: {fileID: 2000100541}
   gameOverCanvas: {fileID: 159470477}
   birdAnim: {fileID: 1083284465}
+  tiltAngle: 45
+  rotationSpeed: 5
 --- !u!95 &1083284465
 Animator:
   serializedVersion: 7

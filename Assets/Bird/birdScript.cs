@@ -25,7 +25,7 @@ public class birdScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKey(KeyCode.Space))
+        if (Input.GetKey(KeyCode.Space) || (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began))
         {
             birdAnim.Play("birdFlap");
             // On applique la force ou la vitesse dans FixedUpdate
@@ -38,7 +38,7 @@ public class birdScript : MonoBehaviour
     // FixedUpdate is called at a fixed interval and is independent of frame rate
     void FixedUpdate()
     {
-        if (Input.GetKey(KeyCode.Space))
+        if (Input.GetKey(KeyCode.Space) || (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began))
         {
             rb.linearVelocity = Vector2.up * velocity; // Gérer la vitesse avec la physique
         }
