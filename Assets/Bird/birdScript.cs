@@ -12,6 +12,8 @@ public class birdScript : MonoBehaviour
     public Animator birdAnim;
     public float tiltAngle = 45f; // Angle maximum d'inclinaison
     public float rotationSpeed = 5f; // Vitesse de rotation de l'oiseau
+    public AudioSource audioSource;
+    public AudioClip flapSound, gameOverSound, hitSound, pointSound;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -25,10 +27,16 @@ public class birdScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKey(KeyCode.Space) || (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began))
+        if (Input.GetKeyDown(KeyCode.Space) || 
+            (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began))
         {
             birdAnim.Play("birdFlap");
-            // On applique la force ou la vitesse dans FixedUpdate
+
+            // Jouer le son du battement d'ailes avec PlayOneShot pour éviter les coupures
+            audioSource.PlayOneShot(flapSound);
+
+            // Appliquer une légère variation au pitch pour rendre chaque clic unique
+            audioSource.pitch = Random.Range(0.9f, 1.1f);
         }
 
         // Mettre à jour le score à l'écran
@@ -38,7 +46,8 @@ public class birdScript : MonoBehaviour
     // FixedUpdate is called at a fixed interval and is independent of frame rate
     void FixedUpdate()
     {
-        if (Input.GetKey(KeyCode.Space) || (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began))
+        if (Input.GetKey(KeyCode.Space) || 
+            (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began))
         {
             rb.linearVelocity = Vector2.up * velocity; // Gérer la vitesse avec la physique
         }
@@ -64,12 +73,15 @@ public class birdScript : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
+        audioSource.PlayOneShot(hitSound);
+        audioSource.PlayOneShot(gameOverSound);
         gameOverCanvas.SetActive(true);
         Time.timeScale = 0;
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        audioSource.PlayOneShot(pointSound);
         score++;
     }
 
