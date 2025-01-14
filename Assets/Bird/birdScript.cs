@@ -23,6 +23,7 @@ public class birdScript : MonoBehaviour
     {
         score = 0;
         rb = GetComponent<Rigidbody2D>();
+        rb.simulated = false; // Désactive la physique au démarrage
         GameStateManager.Instance.StopGameplay();
         tutorialCanvas.SetActive(true);
         gameOverCanvas.SetActive(false);
@@ -36,6 +37,7 @@ public class birdScript : MonoBehaviour
         if (inputDetected && !GameStateManager.Instance.IsGameplayActive)
         {
             GameStateManager.Instance.StartGameplay();
+            rb.simulated = true; // Réactive la physique quand le jeu démarre
             tutorialCanvas.SetActive(false);
         }
 
@@ -111,8 +113,9 @@ public class birdScript : MonoBehaviour
         GameSpeedManager.Instance.ResetSpeed();
         score = 0;
         
-        transform.position = new Vector3(-1f, 0f, 0f);
+        transform.position = new Vector3(0f, 0f, 0f);
         transform.rotation = Quaternion.identity;
+        rb.simulated = false; // Désactive la physique quand on recommence
         rb.linearVelocity = Vector2.zero;
         
         gameOverCanvas.SetActive(false);
