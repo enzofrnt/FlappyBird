@@ -31,40 +31,42 @@ public class birdScript : MonoBehaviour
 
     void Update()
     {
+        // On ne fait rien si le jeu est terminé
+        if (GameStateManager.Instance.IsGameOver) 
+            return;
+
         bool inputDetected = Input.GetKeyDown(KeyCode.Space) || 
             (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began);
 
-        if (inputDetected)
+        // => 1) Démarrer le gameplay (et faire un flap) si le jeu n'est pas encore lancé
+        if (inputDetected && !GameStateManager.Instance.IsGameplayActive)
         {
-            if (!GameStateManager.Instance.IsGameplayActive)
-            {
-                GameStateManager.Instance.StartGameplay();
-                rb.simulated = true; 
-                tutorialCanvas.SetActive(false);
+            GameStateManager.Instance.StartGameplay();
+            rb.simulated = true;
+            tutorialCanvas.SetActive(false);
 
-                // On force directement un flap ici
-                rb.linearVelocity = Vector2.up * velocity; 
-                // Éventuellement jouer l’anim/son ici aussi
-            }
+            // On force directement un flap ici
+            rb.linearVelocity = Vector2.up * velocity; 
+        }
 
-            if (!GameStateManager.Instance.IsGameOver)
-            {
-                birdAnim.Play("birdFlap");
-                audioSource.PlayOneShot(flapSound);
-                audioSource.pitch = Random.Range(0.9f, 1.1f);
-            }
+        // => 2) Jouer l'anim/son du flap s’il y a un input et qu'on n'est pas GameOver
+        if (inputDetected && !GameStateManager.Instance.IsGameOver)
+        {
+            birdAnim.Play("birdFlap");
+            audioSource.PlayOneShot(flapSound);
+            audioSource.pitch = Random.Range(0.9f, 1.1f);
         }
 
         inGameScoreText.text = score.ToString();
-        
     }
 
     void FixedUpdate()
     {
-        if (!GameStateManager.Instance.IsGameplayActive)
+        // Ici, on bloque la physique si le jeu n'a pas commencé OU s’il est terminé
+        if (!GameStateManager.Instance.IsGameplayActive || GameStateManager.Instance.IsGameOver)
             return;
 
-        if (Input.GetKey(KeyCode.Space) || 
+        if (Input.GetKey(KeyCode.Space) ||
             (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began))
         {
             Debug.Log("Flap");
@@ -77,7 +79,7 @@ public class birdScript : MonoBehaviour
             isFalling = true;
             audioSource.PlayOneShot(fallingSound);
         }
-        else if (rb.linearVelocity  .y >= 0)
+        else if (rb.linearVelocity.y >= 0)
         {
             // Réinitialiser l'état si l'oiseau arrête de tomber
             isFalling = false;
@@ -105,11 +107,19 @@ public class birdScript : MonoBehaviour
     private void OnCollisionEnter2D(Collision2D collision)
     {
         audioSource.PlayOneShot(hitSound);
-        if(GameStateManager.Instance.IsGameplayActive) {
+        
+        // Ici, on ne lance le son "gameOver" que si le gameplay est actif
+        if (GameStateManager.Instance.IsGameplayActive) {
             audioSource.PlayOneShot(gameOverSound);
         }
+
         gameOverCanvas.SetActive(true);
+        
+        // => On déclare le gameplay stoppé
         GameStateManager.Instance.StopGameplay();
+        
+        // => On déclare que c'est game over
+        GameStateManager.Instance.GameOver();
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -120,19 +130,26 @@ public class birdScript : MonoBehaviour
 
     public void playAgain()
     {
+        // => Réinitialiser le score, la vitesse, etc.
         GameSpeedManager.Instance.ResetSpeed();
         score = 0;
-        
+
+        // => Réinitialiser la position et l'orientation de l'oiseau
         transform.position = new Vector3(0f, 0f, 0f);
         transform.rotation = Quaternion.identity;
         rb.simulated = false; // Désactive la physique quand on recommence
         rb.linearVelocity = Vector2.zero;
-        
+
+        // => Réactiver l'écran de tutoriel, masquer l'écran de game over
         gameOverCanvas.SetActive(false);
         tutorialCanvas.SetActive(true);
-        
+
+        // => Dire à GameStateManager qu'on n'est plus en game over
+        GameStateManager.Instance.RestartGame();
+        // => Et on arrête le gameplay (en attendant le prochain input)
         GameStateManager.Instance.StopGameplay();
-        
+
+        // => Nettoyer les tuyaux existants
         FindObjectOfType<spawningPipes>().ClearExistingPipes();
     }
 }
