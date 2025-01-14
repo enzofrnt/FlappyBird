@@ -37,13 +37,15 @@ public class GroundRepeater : MonoBehaviour
 
     void FixedUpdate()
     {
+        if (!GameStateManager.Instance.IsGameplayActive)
+            return;
+
         float speed = GameSpeedManager.Instance.speed;
 
         foreach (Transform piece in groundPieces)
         {
             piece.position += Vector3.left * speed * Time.fixedDeltaTime;
 
-            // Quand le morceau sort de l'écran, on le repositionne
             if (piece.position.x <= resetPosition)
             {
                 RepositionPiece(piece);

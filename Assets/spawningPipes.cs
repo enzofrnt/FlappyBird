@@ -3,45 +3,60 @@ using UnityEngine;
 
 public class spawningPipes : MonoBehaviour
 {
-    public float minTime = 1.5f; // Temps minimal entre les spawns
-    public float maxTime = 100000000f; // Temps maximal entre les spawns
+    public float minTime = 1.5f;
+    public float maxTime = 3f;
     private float timer = 0;
     public GameObject pipe;
     public float maxHeight;
     public float minHeight;
+    private float nextSpawnTime;
 
-    private float nextSpawnTime; // Temps défini pour le prochain spawn
-
-    // Start is called before the first frame update
     void Start()
     {
-        SetNextSpawnTime(); // Initialiser le temps du prochain spawn
-        SpawnPipe(); // Créer un premier tuyau
+        SetNextSpawnTime();
     }
 
-    // FixedUpdate is called at a fixed interval and is independent of frame rate
     void FixedUpdate()
     {
+        if (!GameStateManager.Instance.IsGameplayActive)
+            return;
+
         if (timer > nextSpawnTime)
         {
-            SpawnPipe(); // Créer un nouveau tuyau
+            SpawnPipe();
             timer = 0;
-            SetNextSpawnTime(); // Définir le temps pour le prochain spawn
+            SetNextSpawnTime();
         }
 
-        timer += Time.fixedDeltaTime; // Incrémenter le timer
+        timer += Time.fixedDeltaTime;
     }
 
     private void SpawnPipe()
     {
         GameObject newPipe = Instantiate(pipe);
         newPipe.transform.position = transform.position + new Vector3(0, UnityEngine.Random.Range(minHeight, maxHeight), 0);
-        Destroy(newPipe, 10); // Détruire le tuyau après 15 secondes
+        
+        // Détruire les tuyaux existants lors du redémarrage
+        if (GameStateManager.Instance.IsGameplayActive)
+        {
+            Destroy(newPipe, 10f);
+        }
     }
 
     private void SetNextSpawnTime()
     {
-        // Définir aléatoirement le temps pour le prochain spawn entre minTime et maxTime
         nextSpawnTime = UnityEngine.Random.Range(minTime, maxTime);
+    }
+
+    public void ClearExistingPipes()
+    {
+        // Détruire tous les tuyaux existants
+        GameObject[] existingPipes = GameObject.FindGameObjectsWithTag("pipe");
+        foreach (GameObject pipe in existingPipes)
+        {
+            Destroy(pipe);
+        }
+        timer = 0;
+        SetNextSpawnTime();
     }
 }

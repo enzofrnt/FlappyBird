@@ -10,6 +10,7 @@ public class birdScript : MonoBehaviour
     public static int score = 0;
     public TextMeshProUGUI inGameScoreText;
     public GameObject gameOverCanvas;
+    public GameObject tutorialCanvas;
     public Animator birdAnim;
     public float tiltAngle = 45f; // Angle maximum d'inclinaison
     public float rotationSpeed = 5f; // Vitesse de rotation de l'oiseau
@@ -22,8 +23,9 @@ public class birdScript : MonoBehaviour
     {
         score = 0;
         rb = GetComponent<Rigidbody2D>();
-        Time.timeScale = 0;
-        gameStarted = false;
+        GameStateManager.Instance.StopGameplay();
+        tutorialCanvas.SetActive(true);
+        gameOverCanvas.SetActive(false);
     }
 
     void Update()
@@ -31,25 +33,28 @@ public class birdScript : MonoBehaviour
         bool inputDetected = Input.GetKeyDown(KeyCode.Space) || 
             (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began);
 
+        if (inputDetected && !GameStateManager.Instance.IsGameplayActive)
+        {
+            GameStateManager.Instance.StartGameplay();
+            tutorialCanvas.SetActive(false);
+        }
+
         if (inputDetected)
         {
-            if (!gameStarted)
-            {
-                // Premier appui - démarrage du jeu
-                gameStarted = true;
-                Time.timeScale = 1;
-            }
-
             birdAnim.Play("birdFlap");
             audioSource.PlayOneShot(flapSound);
             audioSource.pitch = Random.Range(0.9f, 1.1f);
         }
 
         inGameScoreText.text = score.ToString();
+        
     }
 
     void FixedUpdate()
     {
+        if (!GameStateManager.Instance.IsGameplayActive)
+            return;
+
         if (Input.GetKey(KeyCode.Space) || 
             (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began))
         {
@@ -92,7 +97,7 @@ public class birdScript : MonoBehaviour
         audioSource.PlayOneShot(hitSound);
         audioSource.PlayOneShot(gameOverSound);
         gameOverCanvas.SetActive(true);
-        Time.timeScale = 0;
+        GameStateManager.Instance.StopGameplay();
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -103,6 +108,18 @@ public class birdScript : MonoBehaviour
 
     public void playAgain()
     {
-        SceneManager.LoadScene(0);
+        GameSpeedManager.Instance.ResetSpeed();
+        score = 0;
+        
+        transform.position = new Vector3(-1f, 0f, 0f);
+        transform.rotation = Quaternion.identity;
+        rb.linearVelocity = Vector2.zero;
+        
+        gameOverCanvas.SetActive(false);
+        tutorialCanvas.SetActive(true);
+        
+        GameStateManager.Instance.StopGameplay();
+        
+        FindObjectOfType<spawningPipes>().ClearExistingPipes();
     }
 }
