@@ -35,12 +35,6 @@ public class spawningPipes : MonoBehaviour
     {
         GameObject newPipe = Instantiate(pipe);
         newPipe.transform.position = transform.position + new Vector3(0, UnityEngine.Random.Range(minHeight, maxHeight), 0);
-        
-        // Détruire les tuyaux existants lors du redémarrage
-        if (GameStateManager.Instance.IsGameplayActive)
-        {
-            Destroy(newPipe, 10f);
-        }
     }
 
     private void SetNextSpawnTime()

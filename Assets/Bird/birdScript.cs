@@ -69,7 +69,6 @@ public class birdScript : MonoBehaviour
         if (Input.GetKey(KeyCode.Space) ||
             (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began))
         {
-            Debug.Log("Flap");
             rb.linearVelocity = Vector2.up * velocity; // Gérer la vitesse avec la physique
             isFalling = false; // L'oiseau n'est plus en chute
         }
