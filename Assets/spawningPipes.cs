@@ -3,11 +3,12 @@ using UnityEngine;
 
 public class spawningPipes : MonoBehaviour
 {
-    public float minTime = 1f; // Temps minimal entre les spawns
+    public float minTime = 1.5f; // Temps minimal entre les spawns
     public float maxTime = 100000000f; // Temps maximal entre les spawns
     private float timer = 0;
     public GameObject pipe;
-    public float height;
+    public float maxHeight;
+    public float minHeight;
 
     private float nextSpawnTime; // Temps défini pour le prochain spawn
 
@@ -34,8 +35,8 @@ public class spawningPipes : MonoBehaviour
     private void SpawnPipe()
     {
         GameObject newPipe = Instantiate(pipe);
-        newPipe.transform.position = transform.position + new Vector3(0, UnityEngine.Random.Range(-height, height), 0);
-        Destroy(newPipe, 15); // Détruire le tuyau après 15 secondes
+        newPipe.transform.position = transform.position + new Vector3(0, UnityEngine.Random.Range(minHeight, maxHeight), 0);
+        Destroy(newPipe, 10); // Détruire le tuyau après 15 secondes
     }
 
     private void SetNextSpawnTime()

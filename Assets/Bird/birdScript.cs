@@ -4,6 +4,7 @@ using UnityEngine.SceneManagement;
 
 public class birdScript : MonoBehaviour
 {
+    private bool gameStarted = false;
     public float velocity = 1;
     private Rigidbody2D rb;
     public static int score = 0;
@@ -21,24 +22,29 @@ public class birdScript : MonoBehaviour
     {
         score = 0;
         rb = GetComponent<Rigidbody2D>();
-        Time.timeScale = 1;
+        Time.timeScale = 0;
+        gameStarted = false;
     }
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space) || 
-            (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began))
+        bool inputDetected = Input.GetKeyDown(KeyCode.Space) || 
+            (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began);
+
+        if (inputDetected)
         {
+            if (!gameStarted)
+            {
+                // Premier appui - démarrage du jeu
+                gameStarted = true;
+                Time.timeScale = 1;
+            }
+
             birdAnim.Play("birdFlap");
-
-            // Jouer le son du battement d'ailes
             audioSource.PlayOneShot(flapSound);
-
-            // Appliquer une légère variation au pitch
             audioSource.pitch = Random.Range(0.9f, 1.1f);
         }
 
-        // Mettre à jour le score à l'écran
         inGameScoreText.text = score.ToString();
     }
 
