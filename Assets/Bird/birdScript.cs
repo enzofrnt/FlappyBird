@@ -13,18 +13,17 @@ public class birdScript : MonoBehaviour
     public float tiltAngle = 45f; // Angle maximum d'inclinaison
     public float rotationSpeed = 5f; // Vitesse de rotation de l'oiseau
     public AudioSource audioSource;
-    public AudioClip flapSound, gameOverSound, hitSound, pointSound;
+    public AudioClip flapSound, gameOverSound, hitSound, pointSound, fallingSound;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    private bool isFalling = false; // État pour détecter la chute
+
     void Start()
     {
         score = 0;
         rb = GetComponent<Rigidbody2D>();
-
         Time.timeScale = 1;
     }
 
-    // Update is called once per frame
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Space) || 
@@ -32,10 +31,10 @@ public class birdScript : MonoBehaviour
         {
             birdAnim.Play("birdFlap");
 
-            // Jouer le son du battement d'ailes avec PlayOneShot pour éviter les coupures
+            // Jouer le son du battement d'ailes
             audioSource.PlayOneShot(flapSound);
 
-            // Appliquer une légère variation au pitch pour rendre chaque clic unique
+            // Appliquer une légère variation au pitch
             audioSource.pitch = Random.Range(0.9f, 1.1f);
         }
 
@@ -43,13 +42,24 @@ public class birdScript : MonoBehaviour
         inGameScoreText.text = score.ToString();
     }
 
-    // FixedUpdate is called at a fixed interval and is independent of frame rate
     void FixedUpdate()
     {
         if (Input.GetKey(KeyCode.Space) || 
             (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began))
         {
             rb.linearVelocity = Vector2.up * velocity; // Gérer la vitesse avec la physique
+            isFalling = false; // L'oiseau n'est plus en chute
+        }
+        else if (rb.linearVelocity.y < -6 && !isFalling)
+        {
+            // Si l'oiseau est en chute libre et le son n'est pas joué
+            isFalling = true;
+            audioSource.PlayOneShot(fallingSound);
+        }
+        else if (rb.linearVelocity  .y >= 0)
+        {
+            // Réinitialiser l'état si l'oiseau arrête de tomber
+            isFalling = false;
         }
 
         // Limiter la position Y de l'oiseau
