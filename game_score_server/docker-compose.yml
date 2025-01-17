@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+
+  web_dev:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/game_score_server
+    environment:
+      - DJANGO_SETTINGS_MODULE=server.settings.development
+      - DJANGO_SECRET_KEY=dev-secret-key
+    command: >
+      sh -c "python manage.py migrate &&
+            python manage.py runserver 0.0.0.0:8000"
+    profiles: 
+      - dev
+
+  web_prod:
+    build: .
+    volumes:
+      - .:/game_score_server
+    ports:
+      - "8001:8000"
+    environment:
+      - DJANGO_SETTINGS_MODULE=server.settings.production
+      - DJANGO_SECRET_KEY=${PROD_SECRET_KEY:-default-secure-key}
+    command: >
+      sh -c "python manage.py migrate &&
+            gunicorn server.wsgi:application --bind 0.0.0.0:8000"
+    profiles:
+      - prod

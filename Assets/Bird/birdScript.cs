@@ -107,17 +107,18 @@ public class birdScript : MonoBehaviour
     {
         audioSource.PlayOneShot(hitSound);
         
-        // Ici, on ne lance le son "gameOver" que si le gameplay est actif
-        if (GameStateManager.Instance.IsGameplayActive) {
+        if (GameStateManager.Instance.IsGameplayActive) 
+        {
             audioSource.PlayOneShot(gameOverSound);
+            // N'envoyer le score que si on n'est pas en mode skip
+            if (!AuthManager.Instance.IsSkipMode)
+            {
+                ScoreManager.Instance.SendScore(score);
+            }
         }
 
         gameOverCanvas.SetActive(true);
-        
-        // => On déclare le gameplay stoppé
         GameStateManager.Instance.StopGameplay();
-        
-        // => On déclare que c'est game over
         GameStateManager.Instance.GameOver();
     }
 
