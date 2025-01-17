@@ -1,35 +1,20 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from rest_framework.authtoken.models import Token
 from .models import Score
 
 class UserSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True)
-    token = serializers.CharField(read_only=True)
-
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'password', 'token']
+        fields = ('id', 'username', 'email', 'password')
+        extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
-        user = User.objects.create_user(
-            username=validated_data['username'],
-            email=validated_data['email'],
-            password=validated_data['password']
-        )
-        # Créer un token pour l'utilisateur
-        Token.objects.create(user=user)
+        user = User.objects.create_user(**validated_data)
         return user
 
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        # Ajouter le token dans la réponse
-        data['token'] = Token.objects.get(user=instance).key
-        return data
-
 class ScoreSerializer(serializers.ModelSerializer):
-    player = UserSerializer(read_only=True)
+    player_name = serializers.CharField(source='player.username', read_only=True)
 
     class Meta:
         model = Score
-        fields = ['id', 'player', 'score', 'created_at'] 
+        fields = ('score', 'player_name') 
