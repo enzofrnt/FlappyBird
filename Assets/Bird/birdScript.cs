@@ -36,7 +36,8 @@ public class birdScript : MonoBehaviour
             return;
 
         bool inputDetected = Input.GetKeyDown(KeyCode.Space) || 
-            (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began);
+            (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began) ||
+            Input.GetMouseButtonDown(0); // Ajout du clic gauche
 
         // => 1) Démarrer le gameplay (et faire un flap) si le jeu n'est pas encore lancé
         if (inputDetected && !GameStateManager.Instance.IsGameplayActive)
@@ -67,10 +68,11 @@ public class birdScript : MonoBehaviour
             return;
 
         if (Input.GetKey(KeyCode.Space) ||
-            (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began))
+            (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began) ||
+            Input.GetMouseButtonDown(0))
         {
-            rb.linearVelocity = Vector2.up * velocity; // Gérer la vitesse avec la physique
-            isFalling = false; // L'oiseau n'est plus en chute
+            rb.linearVelocity = Vector2.up * velocity;
+            isFalling = false;
         }
         else if (rb.linearVelocity.y < -6 && !isFalling)
         {
