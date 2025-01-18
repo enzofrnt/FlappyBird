@@ -32,7 +32,7 @@ public class ScoreManager : MonoBehaviour
     {
         if (!AuthManager.Instance.IsAuthenticated)
         {
-            Debug.LogError("Utilisateur non authentifié");
+            Debug.LogWarning("Utilisateur non authentifié");
             yield break;
         }
 

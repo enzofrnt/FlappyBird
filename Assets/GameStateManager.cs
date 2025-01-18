@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Android;
+using UnityEngine.SceneManagement;
 
 public class GameStateManager : MonoBehaviour
 {
@@ -49,10 +50,16 @@ public class GameStateManager : MonoBehaviour
 
     private void Start()
     {
-        if (!AuthManager.Instance.IsAuthenticated)
+        // On ne redirige vers l'auth que si on arrive directement sur la scène de jeu
+        // sans être passé par l'écran de login
+        if (!AuthManager.Instance.IsAuthenticated && SceneManager.GetActiveScene().name == "Game")
         {
-            SceneLoader.Instance.LoadAuth();
-            return;
+            // Vérifier si c'est le premier chargement de la scène
+            if (!AuthManager.Instance.IsSkipMode)
+            {
+                SceneLoader.Instance.LoadAuth();
+                return;
+            }
         }
     }
 

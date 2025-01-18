@@ -56,9 +56,6 @@ public class AuthManager : MonoBehaviour
         PlayerPrefs.SetString(PLAYER_USERNAME_KEY, username);
         PlayerPrefs.Save();
         OnAuthenticationChanged?.Invoke(true);
-        
-        // Après l'authentification réussie, charger la scène de jeu
-        SceneLoader.Instance.LoadGame();
     }
 
     public void Logout()
@@ -71,17 +68,17 @@ public class AuthManager : MonoBehaviour
         OnAuthenticationChanged?.Invoke(false);
     }
 
-    public void Register(string username, string email, string password, Action<bool> callback)
+    public void Register(string username, string email, string password, Action<bool, string> callback)
     {
         StartCoroutine(RegisterCoroutine(username, email, password, callback));
     }
 
-    public void Login(string username, string password, Action<bool> callback)
+    public void Login(string username, string password, Action<bool, string> callback)
     {
         StartCoroutine(LoginCoroutine(username, password, callback));
     }
 
-    private IEnumerator RegisterCoroutine(string username, string email, string password, Action<bool> callback)
+    private IEnumerator RegisterCoroutine(string username, string email, string password, Action<bool, string> callback)
     {
         string jsonData = $"{{\"username\": \"{username}\", \"email\": \"{email}\", \"password\": \"{password}\"}}";
         using (UnityWebRequest www = new UnityWebRequest(API_URL + "api/users/", "POST"))
@@ -97,17 +94,18 @@ public class AuthManager : MonoBehaviour
             {
                 AuthResponse response = JsonUtility.FromJson<AuthResponse>(www.downloadHandler.text);
                 SaveAuth(response.token, response.username);
-                callback(true);
+                callback(true, "");
             }
             else
             {
-                Debug.LogError($"Erreur d'inscription : {www.error}");
-                callback(false);
+                string errorMessage = "Erreur d'inscription. Vérifiez vos informations.";
+                Debug.LogWarning($"Erreur d'inscription : {www.error}");
+                callback(false, errorMessage);
             }
         }
     }
 
-    private IEnumerator LoginCoroutine(string username, string password, Action<bool> callback)
+    private IEnumerator LoginCoroutine(string username, string password, Action<bool, string> callback)
     {
         using (UnityWebRequest www = new UnityWebRequest(API_URL + "api/token-auth/", "POST"))
         {
@@ -117,20 +115,23 @@ public class AuthManager : MonoBehaviour
             www.downloadHandler = new DownloadHandlerBuffer();
             www.SetRequestHeader("Content-Type", "application/json");
 
-            Debug.Log($"Tentative de connexion à : {API_URL}api/token-auth/");
-
             yield return www.SendWebRequest();
 
             if (www.result == UnityWebRequest.Result.Success)
             {
                 AuthResponse response = JsonUtility.FromJson<AuthResponse>(www.downloadHandler.text);
                 SaveAuth(response.token, username);
-                callback(true);
+                callback(true, "");
             }
             else
             {
+                string errorMessage = "Identifiants incorrects";
+                if (www.responseCode == 400)
+                {
+                    errorMessage = "Nom d'utilisateur ou mot de passe incorrect";
+                }
                 Debug.LogError($"Erreur de connexion : {www.error}");
-                callback(false);
+                callback(false, errorMessage);
             }
         }
     }
