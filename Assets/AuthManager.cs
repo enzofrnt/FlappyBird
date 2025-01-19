@@ -15,7 +15,7 @@ public class AuthResponse
 
 public class AuthManager : MonoBehaviour
 {
-    public const string API_URL = "http://localhost:8000/";
+    public const string API_URL = "https://flappybird-score.enzo-frnt.fr/";
     private const string PLAYER_TOKEN_KEY = "PlayerToken";
     private const string PLAYER_USERNAME_KEY = "PlayerUsername";
     
