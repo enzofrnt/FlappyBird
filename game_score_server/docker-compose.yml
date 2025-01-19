@@ -26,7 +26,7 @@ services:
       - DJANGO_SECRET_KEY=${PROD_SECRET_KEY:-default-secure-key}
     command: >
       sh -c "python manage.py migrate &&
-            gunicorn server.wsgi:application --bind 0.0.0.0:8000"
+            gunicorn server.wsgi:application --bind 0.0.0.0:8000 --log-level debug --access-logfile - --error-logfile -"
     profiles:
       - prod
     networks:

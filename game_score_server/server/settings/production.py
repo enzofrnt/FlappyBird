@@ -11,10 +11,10 @@ DATABASES = {
     }
 }
 
-# Configuration de sécurité supplémentaire
-SECURE_SSL_REDIRECT = True
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+# Désactivation des configurations SSL pour le développement
+SECURE_SSL_REDIRECT = False
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
 
 # Configuration des logs pour la production
 LOGGING = {
@@ -31,27 +31,33 @@ LOGGING = {
         'console': {
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
+            'level': 'DEBUG',  # Changé à DEBUG pour voir plus de détails
         },
     },
     'loggers': {
         'django': {
             'handlers': ['console'],
-            'level': 'INFO',
+            'level': 'DEBUG',  # Changé à DEBUG
             'propagate': True,
+        },
+        'django.server': {  # Ajout des logs du serveur
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
         },
         'gamescore': {
             'handlers': ['console'],
-            'level': 'INFO',
+            'level': 'DEBUG',  # Changé à DEBUG
             'propagate': True,
         },
         'gunicorn.access': {
             'handlers': ['console'],
-            'level': 'INFO',
+            'level': 'DEBUG',  # Changé à DEBUG
             'propagate': False,
         },
         'gunicorn.error': {
             'handlers': ['console'],
-            'level': 'INFO',
+            'level': 'DEBUG',  # Changé à DEBUG
             'propagate': False,
         },
     },
