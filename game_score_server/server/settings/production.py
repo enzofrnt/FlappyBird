@@ -28,39 +28,29 @@ LOGGING = {
         },
     },
     'handlers': {
-        'file': {
-            'level': 'INFO',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'maxBytes': 1024 * 1024 * 5,  # 5 MB
-            'backupCount': 5,
+        'console': {
+            'class': 'logging.StreamHandler',
             'formatter': 'verbose',
         },
-        'gunicorn': {
-            'level': 'INFO',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'maxBytes': 1024 * 1024 * 5,  # 5 MB
-            'backupCount': 5,
-            'formatter': 'verbose',
-        }
     },
     'loggers': {
         'django': {
-            'handlers': ['file'],
+            'handlers': ['console'],
             'level': 'INFO',
             'propagate': True,
         },
         'gamescore': {
-            'handlers': ['file'],
+            'handlers': ['console'],
             'level': 'INFO',
             'propagate': True,
         },
         'gunicorn.access': {
-            'handlers': ['gunicorn'],
+            'handlers': ['console'],
             'level': 'INFO',
             'propagate': False,
         },
         'gunicorn.error': {
-            'handlers': ['gunicorn'],
+            'handlers': ['console'],
             'level': 'INFO',
             'propagate': False,
         },
