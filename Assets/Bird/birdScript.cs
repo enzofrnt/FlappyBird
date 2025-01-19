@@ -1,6 +1,9 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.InputSystem;
+using UnityEngine.EventSystems;
+using System.Collections;
 
 public class birdScript : MonoBehaviour
 {
@@ -18,6 +21,56 @@ public class birdScript : MonoBehaviour
     public AudioClip flapSound, gameOverSound, hitSound, pointSound, fallingSound;
 
     private bool isFalling = false; // État pour détecter la chute
+    private PlayerInputActions controls;
+
+    private void Awake()
+    {
+        controls = new PlayerInputActions();
+        
+        // Configurer le callback pour l'action Flap
+        controls.Gameplay.Flap.performed += ctx => OnFlapInput();
+    }
+
+    private void OnEnable()
+    {
+        controls.Gameplay.Enable();
+    }
+
+    private void OnDisable()
+    {
+        controls.Gameplay.Disable();
+    }
+
+    private void OnFlapInput()
+    {
+        // Utiliser un délai d'une frame pour la vérification UI
+        StartCoroutine(CheckUIAndFlap());
+    }
+
+    private IEnumerator CheckUIAndFlap()
+    {
+        yield return null; // Attendre une frame
+        
+        if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+            yield break;
+
+        // Si le jeu n'est pas encore lancé
+        if (!GameStateManager.Instance.IsGameplayActive && !GameStateManager.Instance.IsGameOver)
+        {
+            GameStateManager.Instance.StartGameplay();
+            rb.simulated = true;
+            tutorialCanvas.SetActive(false);
+            rb.linearVelocity = Vector2.up * velocity;
+        }
+        // Si le jeu est en cours
+        else if (!GameStateManager.Instance.IsGameOver)
+        {
+            birdAnim.Play("birdFlap");
+            audioSource.PlayOneShot(flapSound);
+            audioSource.pitch = Random.Range(0.9f, 1.1f);
+            rb.linearVelocity = Vector2.up * velocity;
+        }
+    }
 
     void Start()
     {
@@ -35,46 +88,19 @@ public class birdScript : MonoBehaviour
         if (GameStateManager.Instance.IsGameOver) 
             return;
 
-        bool inputDetected = Input.GetKeyDown(KeyCode.Space) || 
-            (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began) ||
-            Input.GetMouseButtonDown(0); // Ajout du clic gauche
-
-        // => 1) Démarrer le gameplay (et faire un flap) si le jeu n'est pas encore lancé
-        if (inputDetected && !GameStateManager.Instance.IsGameplayActive)
-        {
-            GameStateManager.Instance.StartGameplay();
-            rb.simulated = true;
-            tutorialCanvas.SetActive(false);
-
-            // On force directement un flap ici
-            rb.linearVelocity = Vector2.up * velocity; 
-        }
-
-        // => 2) Jouer l'anim/son du flap s’il y a un input et qu'on n'est pas GameOver
-        if (inputDetected && !GameStateManager.Instance.IsGameOver)
-        {
-            birdAnim.Play("birdFlap");
-            audioSource.PlayOneShot(flapSound);
-            audioSource.pitch = Random.Range(0.9f, 1.1f);
-        }
-
-        inGameScoreText.text = score.ToString();
+        // Mise à jour du score uniquement
+        if (inGameScoreText != null)
+            inGameScoreText.text = score.ToString();
     }
 
     void FixedUpdate()
     {
-        // Ici, on bloque la physique si le jeu n'a pas commencé OU s’il est terminé
+        // Ici, on bloque la physique si le jeu n'a pas commencé OU s'il est terminé
         if (!GameStateManager.Instance.IsGameplayActive || GameStateManager.Instance.IsGameOver)
             return;
 
-        if (Input.GetKey(KeyCode.Space) ||
-            (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began) ||
-            Input.GetMouseButtonDown(0))
-        {
-            rb.linearVelocity = Vector2.up * velocity;
-            isFalling = false;
-        }
-        else if (rb.linearVelocity.y < -6 && !isFalling)
+        // La gestion des inputs est maintenant gérée par OnFlapInput()
+        if (rb.linearVelocity.y < -6 && !isFalling)
         {
             // Si l'oiseau est en chute libre et le son n'est pas joué
             isFalling = true;
