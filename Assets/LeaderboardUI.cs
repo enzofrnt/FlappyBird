@@ -10,7 +10,7 @@ public class LeaderboardUI : MonoBehaviour
     [System.Serializable]
     private class ScoreData
     {
-        public int score;
+        public long score;
         public string player_name;
     }
 
@@ -28,7 +28,7 @@ public class LeaderboardUI : MonoBehaviour
     private void Start()
     {
         leaderboardPanel.SetActive(false);
-        
+                
         // Configuration du conteneur
         VerticalLayoutGroup layoutGroup = scoreContainer.gameObject.AddComponent<VerticalLayoutGroup>();
         layoutGroup.childAlignment = TextAnchor.UpperCenter;
@@ -87,28 +87,18 @@ public class LeaderboardUI : MonoBehaviour
 
     private IEnumerator GetTopScores()
     {
-        using (UnityWebRequest www = UnityWebRequest.Get(AuthManager.API_URL + "api/scores/"))
-        {
-            if (AuthManager.Instance.IsAuthenticated)
+        yield return StartCoroutine(APIManager.Instance.GetScores((jsonArray) => {
+            if (jsonArray != null)
             {
-                www.SetRequestHeader("Authorization", $"Token {AuthManager.Instance.PlayerToken}");
-            }
-
-            yield return www.SendWebRequest();
-
-            if (www.result == UnityWebRequest.Result.Success)
-            {
-                string jsonArray = www.downloadHandler.text;
-                // Convertir le tableau JSON en objet JSON
                 string jsonObject = $"{{\"scores\":{jsonArray}}}";
                 ScoreListResponse response = JsonUtility.FromJson<ScoreListResponse>(jsonObject);
                 DisplayScores(response.scores);
             }
             else
             {
-                Debug.LogError($"Erreur lors de la récupération des scores : {www.error}");
+                Debug.LogError("Erreur lors de la récupération des scores");
             }
-        }
+        }));
     }
 
     private void DisplayScores(List<ScoreData> scores)

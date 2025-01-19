@@ -141,7 +141,12 @@ public class birdScript : MonoBehaviour
             // N'envoyer le score que si on n'est pas en mode skip
             if (!AuthManager.Instance.IsSkipMode)
             {
-                ScoreManager.Instance.SendScore(score);
+                APIManager.Instance.SendScore(score, (success, error) => {
+                    if (!success)
+                    {
+                        Debug.LogError($"Erreur lors de l'envoi du score : {error}");
+                    }
+                });
             }
         }
 

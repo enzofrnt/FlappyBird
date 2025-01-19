@@ -15,7 +15,6 @@ public class AuthResponse
 
 public class AuthManager : MonoBehaviour
 {
-    public const string API_URL = "https://flappybird-score.enzo-frnt.fr/";
     private const string PLAYER_TOKEN_KEY = "PlayerToken";
     private const string PLAYER_USERNAME_KEY = "PlayerUsername";
     
@@ -33,6 +32,15 @@ public class AuthManager : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
+            
+            // S'assurer que APIManager existe
+            if (APIManager.Instance == null)
+            {
+                GameObject apiManagerObj = new GameObject("APIManager");
+                apiManagerObj.AddComponent<APIManager>();
+                DontDestroyOnLoad(apiManagerObj);
+            }
+            
             LoadSavedAuth();
         }
         else
@@ -80,60 +88,26 @@ public class AuthManager : MonoBehaviour
 
     private IEnumerator RegisterCoroutine(string username, string email, string password, Action<bool, string> callback)
     {
-        string jsonData = $"{{\"username\": \"{username}\", \"email\": \"{email}\", \"password\": \"{password}\"}}";
-        using (UnityWebRequest www = new UnityWebRequest(API_URL + "api/users/", "POST"))
-        {
-            byte[] bodyRaw = Encoding.UTF8.GetBytes(jsonData);
-            www.uploadHandler = new UploadHandlerRaw(bodyRaw);
-            www.downloadHandler = new DownloadHandlerBuffer();
-            www.SetRequestHeader("Content-Type", "application/json");
-
-            yield return www.SendWebRequest();
-
-            if (www.result == UnityWebRequest.Result.Success)
+        yield return StartCoroutine(APIManager.Instance.Register(username, email, password, (success, token, error) => {
+            if (success)
             {
-                AuthResponse response = JsonUtility.FromJson<AuthResponse>(www.downloadHandler.text);
-                SaveAuth(response.token, response.username);
-                callback(true, "");
+                IsSkipMode = false;
+                SaveAuth(token, username);
             }
-            else
-            {
-                string errorMessage = "Erreur d'inscription. Vérifiez vos informations.";
-                Debug.LogWarning($"Erreur d'inscription : {www.error}");
-                callback(false, errorMessage);
-            }
-        }
+            callback(success, error);
+        }));
     }
 
     private IEnumerator LoginCoroutine(string username, string password, Action<bool, string> callback)
     {
-        using (UnityWebRequest www = new UnityWebRequest(API_URL + "api/token-auth/", "POST"))
-        {
-            string jsonData = $"{{\"username\": \"{username}\", \"password\": \"{password}\"}}";
-            byte[] bodyRaw = Encoding.UTF8.GetBytes(jsonData);
-            www.uploadHandler = new UploadHandlerRaw(bodyRaw);
-            www.downloadHandler = new DownloadHandlerBuffer();
-            www.SetRequestHeader("Content-Type", "application/json");
-
-            yield return www.SendWebRequest();
-
-            if (www.result == UnityWebRequest.Result.Success)
+        yield return StartCoroutine(APIManager.Instance.Login(username, password, (success, token, error) => {
+            if (success)
             {
-                AuthResponse response = JsonUtility.FromJson<AuthResponse>(www.downloadHandler.text);
-                SaveAuth(response.token, username);
-                callback(true, "");
+                IsSkipMode = false;
+                SaveAuth(token, username);
             }
-            else
-            {
-                string errorMessage = "Identifiants incorrects";
-                if (www.responseCode == 400)
-                {
-                    errorMessage = "Nom d'utilisateur ou mot de passe incorrect";
-                }
-                Debug.LogError($"Erreur de connexion : {www.error}");
-                callback(false, errorMessage);
-            }
-        }
+            callback(success, error);
+        }));
     }
 
     public void SkipAuth()
