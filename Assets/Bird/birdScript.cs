@@ -138,15 +138,9 @@ public class birdScript : MonoBehaviour
         if (GameStateManager.Instance.IsGameplayActive) 
         {
             audioSource.PlayOneShot(gameOverSound);
-            // N'envoyer le score que si on n'est pas en mode skip
             if (!AuthManager.Instance.IsSkipMode)
             {
-                APIManager.Instance.SendScore(score, (success, error) => {
-                    if (!success)
-                    {
-                        Debug.LogError($"Erreur lors de l'envoi du score : {error}");
-                    }
-                });
+                ScoreManager.Instance.SendScore(score);
             }
         }
 

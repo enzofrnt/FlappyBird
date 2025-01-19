@@ -104,10 +104,18 @@ public class APIManager : MonoBehaviour
         }
     }
 
+    [System.Serializable]
+    public class ScoreData
+    {
+        public int score;
+    }
+
     public IEnumerator SendScore(int score, Action<bool, string> callback)
     {
         Debug.Log($"[APIManager] Sending score: {score}");
-        string jsonData = JsonUtility.ToJson(new { score });
+        ScoreData scoreData = new ScoreData { score = score };
+        string jsonData = JsonUtility.ToJson(scoreData);
+        Debug.Log($"[APIManager] JSON data: {jsonData}");  // Pour débugger
         
         using (UnityWebRequest www = CreateRequest("api/scores/", "POST", jsonData))
         {
