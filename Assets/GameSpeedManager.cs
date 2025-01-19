@@ -4,7 +4,7 @@ public class GameSpeedManager : MonoBehaviour
 {
     public static GameSpeedManager Instance;
     public float speed = 1f;
-    public float speedIncrement = 0.1f;
+    public float speedIncrement = 0.03f;
 
     private void Awake()
     {
