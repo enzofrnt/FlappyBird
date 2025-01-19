@@ -11,11 +11,6 @@ DATABASES = {
     }
 }
 
-# Désactivation des configurations SSL pour le développement
-SECURE_SSL_REDIRECT = False
-SESSION_COOKIE_SECURE = False
-CSRF_COOKIE_SECURE = False
-
 # Configuration des logs pour la production
 LOGGING = {
     'version': 1,
@@ -62,3 +57,10 @@ LOGGING = {
         },
     },
 } 
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+    ],
+}
