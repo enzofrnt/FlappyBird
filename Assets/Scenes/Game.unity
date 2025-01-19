@@ -1419,6 +1419,7 @@ MonoBehaviour:
   leaderboardPanel: {fileID: 684988494}
   scoreItemPrefab: {fileID: 704304729264918077, guid: 4d0e0827b0f7340c886453a2918a0fe4, type: 3}
   scoreContainer: {fileID: 428115413}
+  leaderboardButton: {fileID: 110747203}
 --- !u!114 &497606038
 MonoBehaviour:
   m_ObjectHideFlags: 0
